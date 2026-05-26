@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kario — Maritime Contract Intelligence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23040c1e'/><text y='.9em' font-size='80' x='12' fill='%23c8a84c' font-family='Georgia'>K</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Syne:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:    #040c1e;
+  --bg2:   #071529;
+  --bg3:   #0c1d38;
+  --bg4:   #132440;
+  --gold:  #c8a84c;
+  --gold2: #e0c47a;
+  --gold3: #8f6d1c;
+  --text:  #e6e2d6;
+  --text2: #8fa4c0;
+  --text3: #4d6480;
+  --bdr:   rgba(200,168,76,0.13);
+  --bdr2:  rgba(200,168,76,0.28);
+  --bdr3:  rgba(200,168,76,0.55);
+  --green: #2ecfa0;
+  --red:   #e05c5c;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', system-ui, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; line-height: 1.1; }
+.mono { font-family: 'IBM Plex Mono', 'Courier New', monospace; }
+.label { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 52px; }
+.section { padding: 108px 0; }
+.section-sm { padding: 80px 0; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 18px 0;
+  background: rgba(4,12,30,0.82);
+  backdrop-filter: blur(18px);
+  border-bottom: 0.5px solid var(--bdr);
+  transition: box-shadow 0.3s;
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500;
+  color: #fff; letter-spacing: 0.1em; text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-mark {
+  width: 26px; height: 26px; border: 1.5px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--gold); font-weight: 400;
+}
+.nav-links { display: flex; gap: 38px; list-style: none; }
+.nav-links a { color: var(--text2); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.03em; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  padding: 8px 22px; border: 1px solid var(--gold); color: var(--gold);
+  text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+  transition: all 0.2s; font-family: 'Syne', sans-serif;
+}
+.nav-cta:hover { background: var(--gold); color: var(--bg); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding-top: 80px; position: relative; overflow: hidden;
+}
+.hero-bg-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(200,168,76,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,168,76,0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 90% 80% at 55% 50%, black 20%, transparent 100%);
+  animation: grid-drift 20s ease-in-out infinite alternate;
+}
+@keyframes grid-drift { from { background-position: 0 0; } to { background-position: 8px 8px; } }
+.hero-glow1 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(200,168,76,0.055) 0%, transparent 68%); top: 50%; left: 40%; transform: translate(-50%,-50%); pointer-events: none; }
+.hero-glow2 { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(46,207,160,0.035) 0%, transparent 70%); top: 20%; left: 10%; pointer-events: none; }
+.hero-inner {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 72px; align-items: center; position: relative; z-index: 1; width: 100%;
+}
+.hero-tag { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 0.5px solid var(--bdr2); margin-bottom: 36px; }
+.tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2.4s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.hero-h1 { font-size: 70px; font-weight: 300; color: #fff; margin-bottom: 24px; line-height: 1.06; }
+.hero-h1 em { color: var(--gold); font-style: italic; }
+.hero-sub { font-size: 16px; color: var(--text2); line-height: 1.75; margin-bottom: 44px; max-width: 460px; }
+.hero-btns { display: flex; gap: 14px; align-items: center; margin-bottom: 60px; }
+.btn-primary {
+  padding: 13px 28px; background: var(--gold); color: var(--bg);
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em;
+  text-decoration: none; transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--gold2); }
+.btn-ghost {
+  padding: 13px 28px; border: 0.5px solid var(--bdr2); color: var(--text2);
+  font-family: 'Syne', sans-serif; font-size: 13px; text-decoration: none; transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--text); }
+.hero-stats { display: flex; gap: 44px; }
+.hs-val { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 400; color: var(--gold); line-height: 1; }
+.hs-label { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+/* Terminal card */
+.hero-terminal { background: var(--bg2); border: 0.5px solid var(--bdr2); overflow: hidden; }
+.term-header {
+  padding: 12px 18px; border-bottom: 0.5px solid var(--bdr);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.term-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 0.06em; }
+.term-status { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--green); }
+.term-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.8s ease infinite; }
+.term-body { padding: 22px 20px; }
+.t-sect { margin-bottom: 16px; }
+.t-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text3); margin-bottom: 9px; }
+.t-row { display: flex; justify-content: space-between; padding: 5px 10px; border-left: 2px solid transparent; margin-bottom: 3px; transition: all 0.3s; }
+.t-row.lit { border-left-color: var(--gold); background: rgba(200,168,76,0.06); }
+.t-key { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text2); }
+.t-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text); font-weight: 500; }
+.t-div { height: 0.5px; background: var(--bdr); margin: 14px 0; }
+.t-result { padding: 16px; background: rgba(200,168,76,0.07); border: 0.5px solid var(--bdr2); text-align: center; margin-top: 4px; }
+.t-result-lbl { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.t-result-val { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 400; color: var(--gold); line-height: 1; }
+.t-badges { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+.t-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 10px; letter-spacing: 0.04em; }
+.tb-g { background: rgba(46,207,160,0.1); color: var(--green); border: 0.5px solid rgba(46,207,160,0.3); }
+.tb-a { background: rgba(200,168,76,0.1); color: var(--gold); border: 0.5px solid var(--bdr2); }
+
+/* ── STATS BAND ── */
+.stats-band { border-top: 0.5px solid var(--bdr); border-bottom: 0.5px solid var(--bdr); background: var(--bg2); }
+.stats-inner { display: grid; grid-template-columns: repeat(4,1fr); }
+.stat-block { padding: 52px 40px; border-right: 0.5px solid var(--bdr); }
+.stat-block:last-child { border-right: none; }
+.sb-val { font-family: 'Cormorant Garamond', serif; font-size: 54px; font-weight: 300; color: var(--gold); line-height: 1; }
+.sb-desc { font-size: 13px; color: var(--text2); margin-top: 8px; line-height: 1.5; }
+
+/* ── SECTION CHROME ── */
+.eyebrow { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.ey-line { flex: 0 0 30px; height: 0.5px; background: var(--gold); }
+.sec-h2 { font-size: 52px; font-weight: 300; line-height: 1.12; }
+.sec-sub { font-size: 16px; color: var(--text2); margin-top: 16px; line-height: 1.7; max-width: 580px; }
+.sec-hd { margin-bottom: 56px; }
+
+/* ── PROBLEM ── */
+.prob-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1px; background: var(--bdr); border: 0.5px solid var(--bdr); }
+.prob-card { background: var(--bg2); padding: 40px; transition: background 0.3s; }
+.prob-card:hover { background: var(--bg3); }
+.prob-num { font-family: 'Cormorant Garamond', serif; font-size: 60px; font-weight: 300; color: var(--gold); line-height: 1; margin-bottom: 14px; opacity: 0.7; }
+.prob-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.prob-body { font-size: 14px; color: var(--text2); line-height: 1.78; }
+
+/* ── PRODUCT ── */
+.prod-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--bdr); }
+.prod-card {
+  background: var(--bg); padding: 44px 40px;
+  position: relative; overflow: hidden; transition: background 0.3s;
+}
+.prod-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  transform: scaleX(0); transition: transform 0.4s; transform-origin: left;
+}
+.prod-card:hover::after { transform: scaleX(1); }
+.prod-card:hover { background: var(--bg2); }
+.prod-icon {
+  width: 42px; height: 42px; border: 0.5px solid var(--bdr2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); margin-bottom: 26px;
+}
+.prod-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #fff; margin-bottom: 14px; }
+.prod-body { font-size: 14px; color: var(--text2); line-height: 1.78; }
+.prod-tags { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 6px; }
+.ptag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 9px; border: 0.5px solid var(--bdr); color: var(--text3); letter-spacing: 0.04em; }
+
+/* ── HOW ── */
+.how-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 2px; }
+.how-card { background: var(--bg2); padding: 30px 26px; border: 0.5px solid var(--bdr); transition: border-color 0.3s; }
+.how-card:hover { border-color: var(--bdr3); }
+.how-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--gold); margin-bottom: 14px; letter-spacing: 0.06em; }
+.how-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.how-desc { font-size: 12px; color: var(--text2); line-height: 1.65; }
+.arch-note { margin-top: 48px; padding: 28px 32px; background: var(--bg2); border: 0.5px solid var(--bdr); display: flex; gap: 24px; align-items: center; }
+.an-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold); white-space: nowrap; letter-spacing: 0.1em; }
+.an-div { width: 0.5px; height: 40px; background: var(--bdr); flex-shrink: 0; }
+.an-text { font-size: 14px; color: var(--text2); line-height: 1.75; }
+
+/* ── COMPARE ── */
+.compare-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--bdr); }
+.cmp-col { background: var(--bg2); }
+.cmp-head { padding: 20px 30px; border-bottom: 0.5px solid var(--bdr); display: flex; align-items: center; gap: 10px; }
+.cmp-head.after { border-left: 2px solid var(--green); }
+.cmp-hlab { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.cmp-hlab.before { color: var(--red); } .cmp-hlab.after { color: var(--green); }
+.cmp-rows {}
+.cmp-row { padding: 20px 30px; border-bottom: 0.5px solid var(--bdr); }
+.cmp-row:last-child { border-bottom: none; }
+.cmp-text { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.cmp-row.after-row .cmp-text { color: var(--text); }
+
+/* ── USERS ── */
+.users-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--bdr); }
+.user-card { background: var(--bg2); padding: 44px 40px; transition: background 0.3s; }
+.user-card:hover { background: var(--bg3); }
+.ubadge { display: inline-block; padding: 4px 12px; margin-bottom: 22px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; }
+.ub-gold { background: rgba(200,168,76,0.1); color: var(--gold); border: 0.5px solid var(--bdr2); }
+.ub-green { background: rgba(46,207,160,0.08); color: var(--green); border: 0.5px solid rgba(46,207,160,0.2); }
+.ub-gray { background: rgba(143,164,192,0.08); color: var(--text2); border: 0.5px solid var(--bdr); }
+.user-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #fff; margin-bottom: 14px; }
+.user-body { font-size: 14px; color: var(--text2); line-height: 1.78; margin-bottom: 22px; }
+.user-names { display: flex; flex-wrap: wrap; gap: 6px; }
+.uname { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 10px; border: 0.5px solid var(--bdr); color: var(--text3); }
+
+/* ── MOAT ── */
+.moat-list { border: 0.5px solid var(--bdr); }
+.moat-row { display: grid; grid-template-columns: 260px 1fr; border-bottom: 0.5px solid var(--bdr); transition: background 0.3s; }
+.moat-row:last-child { border-bottom: none; }
+.moat-row:hover { background: var(--bg2); }
+.moat-left { padding: 40px; border-right: 0.5px solid var(--bdr); }
+.moat-icon-box { width: 38px; height: 38px; border: 0.5px solid var(--bdr2); display: flex; align-items: center; justify-content: center; color: var(--gold); margin-bottom: 16px; }
+.moat-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #fff; }
+.moat-right { padding: 40px; }
+.moat-desc { font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+/* ── PRICING ── */
+.pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--bdr); }
+.price-card { background: var(--bg2); padding: 44px 40px; }
+.price-card.featured { background: var(--bg3); border: 1.5px solid var(--bdr3); position: relative; }
+.feat-tag { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--bg); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 16px; font-family: 'IBM Plex Mono', monospace; }
+.price-tier { font-size: 11px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text3); margin-bottom: 18px; }
+.price-amt { font-family: 'Cormorant Garamond', serif; font-size: 50px; font-weight: 300; color: var(--gold); line-height: 1; }
+.price-period { font-size: 13px; color: var(--text3); margin-top: 8px; margin-bottom: 30px; }
+.price-div { height: 0.5px; background: var(--bdr); margin-bottom: 26px; }
+.price-list { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.price-list li { font-size: 13px; color: var(--text2); display: flex; gap: 12px; line-height: 1.5; }
+.price-list li::before { content: '—'; color: var(--gold); flex-shrink: 0; font-family: 'IBM Plex Mono', monospace; }
+.price-cta { margin-top: 36px; display: block; padding: 13px 20px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; font-family: 'Syne', sans-serif; transition: all 0.2s; }
+.pc-outline { border: 0.5px solid var(--bdr2); color: var(--text2); }
+.pc-outline:hover { border-color: var(--gold); color: var(--gold); }
+.pc-filled { background: var(--gold); color: var(--bg); }
+.pc-filled:hover { background: var(--gold2); }
+
+/* ── COMPETITIVE ── */
+.comp-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1px; background: var(--bdr); }
+.comp-card { background: var(--bg2); padding: 40px; }
+.comp-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.comp-body { font-size: 14px; color: var(--text2); line-height: 1.75; margin-bottom: 18px; }
+.comp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.ctag-r { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 9px; background: rgba(224,92,92,0.08); color: var(--red); border: 0.5px solid rgba(224,92,92,0.25); }
+.ctag-g { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 9px; background: rgba(46,207,160,0.08); color: var(--green); border: 0.5px solid rgba(46,207,160,0.22); }
+.comp-card.kario { border: 1px solid var(--bdr3); }
+.comp-card.kario .comp-title { color: var(--gold); }
+
+/* ── GTM ── */
+.gtm-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--bdr); }
+.gtm-card { background: var(--bg2); padding: 36px; }
+.gtm-phase { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 14px; }
+.gtm-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.gtm-body { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+/* ── FOUNDER ── */
+.founder-section { background: var(--bg2); border-top: 0.5px solid var(--bdr); border-bottom: 0.5px solid var(--bdr); }
+.founder-inner { display: grid; grid-template-columns: 320px 1fr; gap: 88px; align-items: start; }
+.founder-photo {
+  aspect-ratio: 3/4; background: var(--bg3); border: 0.5px solid var(--bdr2);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.founder-photo::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 55%, rgba(200,168,76,0.09) 100%);
+}
+.founder-photo::after {
+  content: '51°30′N'; font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  color: var(--text3); position: absolute; bottom: 14px; right: 14px; letter-spacing: 0.05em;
+}
+.founder-initials { font-family: 'Cormorant Garamond', serif; font-size: 88px; font-weight: 300; color: var(--gold); opacity: 0.55; position: relative; z-index: 1; }
+.founder-name { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 400; color: #fff; line-height: 1.05; margin-bottom: 6px; }
+.founder-role { font-size: 12px; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; margin-bottom: 36px; }
+.founder-bio { font-size: 16px; color: var(--text2); line-height: 1.82; margin-bottom: 18px; }
+.founder-detail { border-top: 0.5px solid var(--bdr); padding-top: 30px; margin-top: 10px; display: flex; flex-direction: column; gap: 14px; }
+.fd-row { display: flex; gap: 20px; }
+.fd-key { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); min-width: 90px; margin-top: 2px; }
+.fd-val { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.fd-gold { color: var(--gold); }
+
+/* ── CTA ── */
+.final-cta { text-align: center; border-top: 0.5px solid var(--bdr); }
+.cta-eyebrow { justify-content: center; }
+.cta-h2 { font-size: 62px; font-weight: 300; color: #fff; margin-bottom: 20px; line-height: 1.1; }
+.cta-h2 em { color: var(--gold); font-style: italic; }
+.cta-sub { font-size: 16px; color: var(--text2); margin-bottom: 48px; line-height: 1.75; max-width: 540px; margin-left: auto; margin-right: auto; }
+.cta-btns { display: flex; gap: 14px; justify-content: center; }
+
+/* ── FOOTER ── */
+footer { background: var(--bg2); border-top: 0.5px solid var(--bdr); padding: 56px 0 32px; }
+.foot-inner { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.foot-brand-text { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #fff; letter-spacing: 0.08em; display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+.foot-logo-mark { width: 22px; height: 22px; border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold); }
+.foot-tagline { font-size: 13px; color: var(--text3); line-height: 1.7; max-width: 210px; }
+.foot-col-title { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 18px; }
+.foot-links { display: flex; flex-direction: column; gap: 10px; }
+.foot-links a { font-size: 13px; color: var(--text2); text-decoration: none; transition: color 0.2s; }
+.foot-links a:hover { color: var(--text); }
+.foot-bottom { border-top: 0.5px solid var(--bdr); padding-top: 26px; display: flex; justify-content: space-between; align-items: center; }
+.foot-copy { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text3); }
+.foot-coords { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text3); }
+
+/* ── SCROLL ANIMATIONS ── */
+.fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+.fade-up.vis { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .container { padding: 0 32px; }
+  .hero-h1 { font-size: 52px; }
+  .hero-inner { gap: 48px; }
+}
+@media (max-width: 860px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-terminal { display: none; }
+  .how-grid { grid-template-columns: 1fr 1fr; }
+  .stats-inner { grid-template-columns: repeat(2,1fr); }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .founder-inner { grid-template-columns: 1fr; }
+  .compare-wrap { grid-template-columns: 1fr; }
+  .moat-row { grid-template-columns: 1fr; }
+  .foot-inner { grid-template-columns: 1fr 1fr; }
+  .sec-h2 { font-size: 38px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ━━━ NAV ━━━ -->
+<nav id="nav">
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-mark">K</div>
+      KARIO
+    </a>
+    <ul class="nav-links">
+      <li><a href="#product">Product</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#company">Company</a></li>
+    </ul>
+    <a href="#cta" class="nav-cta">Request Demo</a>
+  </div>
+</nav>
+
+<!-- ━━━ HERO ━━━ -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow1"></div>
+  <div class="hero-glow2"></div>
+  <div class="container">
+    <div class="hero-inner">
+
+      <div class="hero-left">
+        <div class="hero-tag">
+          <div class="tag-dot"></div>
+          <span class="label" style="font-size:10px; color:var(--text3);">Maritime Contract Intelligence</span>
+        </div>
+        <h1 class="hero-h1">Laytime calculated.<br><em>Demurrage filed.</em><br>Before they open Excel.</h1>
+        <p class="hero-sub">Kario reads charter party terms, port logs, and statements of fact to auto-calculate laytime, flag every claimable exception, and generate a court-ready demurrage claim — in 18 minutes.</p>
+        <div class="hero-btns">
+          <a href="#cta" class="btn-primary">Request demo &rarr;</a>
+          <a href="#how" class="btn-ghost">How it works</a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="hs-val">18 min</div>
+            <div class="hs-label">avg. calculation time</div>
+          </div>
+          <div>
+            <div class="hs-val">$40B</div>
+            <div class="hs-label">annual demurrage market</div>
+          </div>
+          <div>
+            <div class="hs-val">10&times;</div>
+            <div class="hs-label">analyst productivity lift</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-terminal">
+          <div class="term-header">
+            <span class="term-title">KARIO &middot; VOYAGE ANALYSIS</span>
+            <span class="term-status"><span class="term-dot"></span>PROCESSING</span>
+          </div>
+          <div class="term-body">
+            <div class="t-sect">
+              <div class="t-lbl">Vessel &amp; charter party</div>
+              <div class="t-row lit"><span class="t-key">Vessel</span><span class="t-val">MV Nordic Crown</span></div>
+              <div class="t-row lit"><span class="t-key">CP Form</span><span class="t-val">BIMCO Gencon 2022</span></div>
+              <div class="t-row lit"><span class="t-key">Route</span><span class="t-val">Rotterdam → Jurong</span></div>
+            </div>
+            <div class="t-div"></div>
+            <div class="t-sect">
+              <div class="t-lbl">Extracted laytime terms</div>
+              <div class="t-row lit"><span class="t-key">Rate</span><span class="t-val">10,000 MT/day SHINC</span></div>
+              <div class="t-row lit"><span class="t-key">Conditions</span><span class="t-val">WIBON &middot; WIPON</span></div>
+              <div class="t-row lit"><span class="t-key">Exception</span><span class="t-val">Weather &middot; Holidays</span></div>
+            </div>
+            <div class="t-div"></div>
+            <div class="t-sect">
+              <div class="t-lbl">Laytime computation</div>
+              <div class="t-row"><span class="t-key">Time allowed</span><span class="t-val">72h 00m</span></div>
+              <div class="t-row"><span class="t-key">Time used</span><span class="t-val">78h 45m</span></div>
+              <div class="t-row"><span class="t-key">On demurrage</span><span class="t-val" style="color:var(--gold)">6h 45m</span></div>
+            </div>
+            <div class="t-div"></div>
+            <div class="t-result">
+              <div class="t-result-lbl">Demurrage due</div>
+              <div class="t-result-val" id="hero-amt">$0.00</div>
+              <div class="t-badges">
+                <span class="t-badge tb-g">Dispute risk: LOW</span>
+                <span class="t-badge tb-a">94% confidence</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ STATS BAND ━━━ -->
+<div class="stats-band">
+  <div class="container">
+    <div class="stats-inner">
+      <div class="stat-block">
+        <div class="sb-val">$40B+</div>
+        <div class="sb-desc">Global demurrage value settled annually</div>
+      </div>
+      <div class="stat-block">
+        <div class="sb-val">2–3 days</div>
+        <div class="sb-desc">Manual laytime calculation per voyage</div>
+      </div>
+      <div class="stat-block">
+        <div class="sb-val">6-fig.</div>
+        <div class="sb-desc">Average value per demurrage dispute</div>
+      </div>
+      <div class="stat-block">
+        <div class="sb-val">700+</div>
+        <div class="sb-desc">Active commercial ports tracked globally</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ PROBLEM ━━━ -->
+<section class="section" id="problem">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">The problem</span></div>
+      <h2 class="sec-h2">Shipping runs on arcane math<br>done in spreadsheets and email</h2>
+    </div>
+    <div class="prob-grid fade-up">
+      <div class="prob-card">
+        <div class="prob-num">01</div>
+        <div class="prob-title">Document chaos across every voyage</div>
+        <p class="prob-body">A single voyage generates a 200-page charter party, handwritten statements of fact from port agents, NOR tenders via email, berth notes, and weather logs. None of it is structured. All of it is legally operative in a demurrage dispute.</p>
+      </div>
+      <div class="prob-card">
+        <div class="prob-num">02</div>
+        <div class="prob-title">Clause interpretation is a battlefield</div>
+        <p class="prob-body">WIBON, WIPON, SHINC, SHEX, FHINC — the same terms mean subtly different things depending on jurisdiction and custom. Shipowners and charterers each read the same clause to their own advantage. Both cite legal precedent. Both are right, partially.</p>
+      </div>
+      <div class="prob-card">
+        <div class="prob-num">03</div>
+        <div class="prob-title">Missed exceptions bleed six figures per year</div>
+        <p class="prob-body">The average manual calculation misses 3–7 claimable time exceptions per voyage. Each exception is worth $5K–$50K. Across a fleet, this is a systematic, invisible revenue leak that nobody has the tools to audit — until it's already lost.</p>
+      </div>
+      <div class="prob-card">
+        <div class="prob-num">04</div>
+        <div class="prob-title">Stale claims, weakened positions</div>
+        <p class="prob-body">Claims are filed weeks after discharge, by which point port agents have moved on, logs are incomplete, and counterparties know exactly how to exploit the delay. Speed is a legal advantage in demurrage — and most operators file dangerously slow.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ PRODUCT ━━━ -->
+<section class="section" id="product" style="background:var(--bg2); border-top:0.5px solid var(--bdr); border-bottom:0.5px solid var(--bdr);">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">The platform</span></div>
+      <h2 class="sec-h2">Three layers of intelligence.<br>One defensible claim.</h2>
+    </div>
+    <div class="prod-grid fade-up">
+      <div class="prod-card">
+        <div class="prod-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+        </div>
+        <div class="prod-title">Contract Parser</div>
+        <p class="prod-body">Reads any charter party format — BIMCO, Shellvoy, Asbatankvoy, or fully bespoke — and extracts every operative laytime clause, its conditions, exceptions, and legal hierarchy. No templates, no manual tagging, no missed clauses buried in addenda.</p>
+        <div class="prod-tags">
+          <span class="ptag">BIMCO</span><span class="ptag">Shellvoy</span><span class="ptag">Asbatankvoy</span><span class="ptag">Custom CPs</span>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="prod-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div class="prod-title">Laytime Engine</div>
+        <p class="prod-body">A deterministic, auditable rule engine — not a large language model — applies extracted terms to port logs and SOFs. Every second of allowed, excepted, or demurrage time is traced back to a specific source document line. Defensible at LMAA arbitration.</p>
+        <div class="prod-tags">
+          <span class="ptag">SHINC / SHEX</span><span class="ptag">WIBON / WIPON</span><span class="ptag">Port exceptions</span><span class="ptag">Holiday DB</span>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="prod-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 15l-5 3.4 1.9-5.8L4 9h6.1z"/></svg>
+        </div>
+        <div class="prod-title">Dispute Predictor</div>
+        <p class="prod-body">An ML model trained on LMAA, SCMA, and AAA arbitration outcomes scores every contested time period before you file. Know exactly where your counterparty will push back, how strong their position is — and which disputes are worth taking to arbitration.</p>
+        <div class="prod-tags">
+          <span class="ptag">LMAA outcomes</span><span class="ptag">SCMA precedents</span><span class="ptag">Clause strength</span><span class="ptag">Counterparty diff</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ HOW IT WORKS ━━━ -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">How Kario works</span></div>
+      <h2 class="sec-h2">From charter party to filed claim.<br>In 18 minutes.</h2>
+    </div>
+    <div class="how-grid fade-up">
+      <div class="how-card">
+        <div class="how-num">01 &mdash; INGEST</div>
+        <div class="how-name">Document intake</div>
+        <p class="how-desc">OCR and normalization of charter parties, SOFs, NOR tenders, and port logs from any format — PDF, scanned fax, emailed handwritten notes from port agents.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02 &mdash; PARSE</div>
+        <div class="how-name">Clause extraction</div>
+        <p class="how-desc">Fine-tuned LLM reads the CP and extracts every laytime clause, its conditions, and exception hierarchy — tolerating the ambiguity of real contract language.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03 &mdash; CALCULATE</div>
+        <div class="how-name">Laytime computation</div>
+        <p class="how-desc">Deterministic rule engine applies extracted terms to timestamped port events. Port-specific holiday calendar and local customs database applied automatically.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">04 &mdash; FLAG</div>
+        <div class="how-name">Dispute intelligence</div>
+        <p class="how-desc">Dispute model scores each contested time period for arbitration probability. Every flag annotated with relevant case law and clause interpretation strength.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">05 &mdash; CLAIM</div>
+        <div class="how-name">Claim generation</div>
+        <p class="how-desc">Auto-drafts a formal demurrage claim with full audit trail, source-traced calculation worksheet, and supporting exhibits. Ready to send. Ready to defend.</p>
+      </div>
+    </div>
+    <div class="arch-note fade-up">
+      <div class="an-label">KEY ARCHITECTURE NOTE</div>
+      <div class="an-div"></div>
+      <p class="an-text">Kario uses a hybrid architecture: an LLM only for document parsing — where tolerance for contractual ambiguity and varied phrasing is essential — and a deterministic rule engine for calculation, where every second must be auditable to its source. This separation is the product. "The AI calculated it" is not a defensible answer in arbitration. A timestamped rule trace is.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ BEFORE / AFTER ━━━ -->
+<section class="section-sm" style="background:var(--bg2); border-top:0.5px solid var(--bdr); border-bottom:0.5px solid var(--bdr);">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">Before &amp; after</span></div>
+      <h2 class="sec-h2">What changes when Kario<br>runs your voyage operations</h2>
+    </div>
+    <div class="compare-wrap fade-up">
+      <div class="cmp-col">
+        <div class="cmp-head">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          <span class="cmp-hlab before">Without Kario</span>
+        </div>
+        <div class="cmp-rows">
+          <div class="cmp-row"><p class="cmp-text">Ops team spends 2–3 days manually extracting CP terms and rebuilding a laytime sheet in Excel. One analyst, one voyage, one spreadsheet that no one else can read.</p></div>
+          <div class="cmp-row"><p class="cmp-text">3–7 claimable exceptions missed per voyage because port holiday calendars and local customs live in nobody's head and certainly not in any system.</p></div>
+          <div class="cmp-row"><p class="cmp-text">Dispute discovered when the counterparty files a counter-claim weeks post-discharge. No time to rebuild the case from stale logs and unavailable port agents.</p></div>
+          <div class="cmp-row"><p class="cmp-text">Two teams, two spreadsheets, no systematic way to find where the numbers diverge — just competing emails and protracted, expensive negotiation.</p></div>
+        </div>
+      </div>
+      <div class="cmp-col" style="border-left:0.5px solid var(--bdr)">
+        <div class="cmp-head after">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          <span class="cmp-hlab after">With Kario</span>
+        </div>
+        <div class="cmp-rows">
+          <div class="cmp-row after-row"><p class="cmp-text">Kario reads the CP and SOF and returns a complete, source-traced laytime sheet in 18 minutes. One analyst now manages 10× the voyage volume with full audit trail.</p></div>
+          <div class="cmp-row after-row"><p class="cmp-text">Port exception database auto-applies local rules across 700+ ports. Every defensible minute is captured and cited to a specific source document line.</p></div>
+          <div class="cmp-row after-row"><p class="cmp-text">Dispute points scored at calculation time. Claim filed within days of discharge while evidence is fresh, logs are available, and port agents remember the voyage.</p></div>
+          <div class="cmp-row after-row"><p class="cmp-text">Counterparty diff engine pinpoints every disagreement to the hour, annotated with case law strength rating — shortening disputes from months to days.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ WHO USES KARIO ━━━ -->
+<section class="section" id="solutions">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">Who uses Kario</span></div>
+      <h2 class="sec-h2">Built for the operators who<br>carry the contractual risk</h2>
+    </div>
+    <div class="users-grid fade-up">
+      <div class="user-card">
+        <div class="ubadge ub-gold">Primary buyer</div>
+        <div class="user-title">Ship operators &amp; owners</div>
+        <p class="user-body">Dry bulk, tanker, and breakbulk operators running 50–500 voyages per year. Every day's delay on a demurrage claim is a day's cash flow lost. They have the most to gain from faster, more complete recoveries — and the most to lose from slow, incomplete ones.</p>
+        <div class="user-names">
+          <span class="uname">Pacific Basin</span><span class="uname">Diana Shipping</span><span class="uname">Golden Ocean</span>
+        </div>
+      </div>
+      <div class="user-card">
+        <div class="ubadge ub-green">Highest ACV</div>
+        <div class="user-title">Commodity trading houses</div>
+        <p class="user-body">Trafigura, Vitol, Glencore, and Cargill move hundreds of voyages per month. They need to validate and contest owner claims at scale — one ops analyst cannot keep up. Highest contract value of any segment. Most resistant to status quo.</p>
+        <div class="user-names">
+          <span class="uname">Trafigura</span><span class="uname">Vitol</span><span class="uname">Gunvor</span><span class="uname">Cargill</span>
+        </div>
+      </div>
+      <div class="user-card">
+        <div class="ubadge ub-gray">Distribution channel</div>
+        <div class="user-title">P&amp;I clubs &amp; maritime law</div>
+        <p class="user-body">UK P&amp;I, Gard, Steamship Mutual, and top maritime law firms in London, Singapore, and Houston handle hundreds of demurrage disputes annually. Kario offers white-label calculation infrastructure on a revenue-share basis — aligning incentives completely.</p>
+        <div class="user-names">
+          <span class="uname">UK P&amp;I</span><span class="uname">Gard</span><span class="uname">HFW</span><span class="uname">Steamship Mutual</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ MOAT ━━━ -->
+<section class="section" style="background:var(--bg2); border-top:0.5px solid var(--bdr); border-bottom:0.5px solid var(--bdr);">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">Defensibility</span></div>
+      <h2 class="sec-h2">Four moats that compound<br>with every voyage processed</h2>
+    </div>
+    <div class="moat-list fade-up">
+      <div class="moat-row">
+        <div class="moat-left">
+          <div class="moat-icon-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="1"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="moat-name">Arbitration training data</div>
+        </div>
+        <div class="moat-right">
+          <p class="moat-desc">LMAA, SCMA, and AAA arbitration awards are public but entirely unstructured. Building a clean, queryable dataset of outcomes, clause interpretations, and contested time periods is a 12–18 month head start that grows more valuable with every voyage Kario processes. Competitors start from zero — and the model improves continuously from both sides of every dispute.</p>
+        </div>
+      </div>
+      <div class="moat-row">
+        <div class="moat-left">
+          <div class="moat-icon-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+          </div>
+          <div class="moat-name">Port exception database</div>
+        </div>
+        <div class="moat-right">
+          <p class="moat-desc">700+ active commercial ports globally — each with its own public holiday calendar, local port customs, historical berth congestion patterns, and conventional exceptions. No competitor has this compiled. It requires continuous maintenance from port agents and local maritime counsel around the world, and Kario enriches every single calculation with it automatically, without the operator lifting a finger.</p>
+        </div>
+      </div>
+      <div class="moat-row">
+        <div class="moat-left">
+          <div class="moat-icon-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 12h-5l-3-8-2 16-3-9-2 4H2"/></svg>
+          </div>
+          <div class="moat-name">Two-sided network effects</div>
+        </div>
+        <div class="moat-right">
+          <p class="moat-desc">When both owner and charterer use Kario, the dispute workflow is automated end-to-end: each side sees the same source-traced calculation and can challenge specific time periods with one click. Each dual-sided transaction improves dispute prediction accuracy for the entire network. Classic data flywheel — the more voyages, the better the model, the stronger the moat against any new entrant.</p>
+        </div>
+      </div>
+      <div class="moat-row">
+        <div class="moat-left">
+          <div class="moat-icon-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="1"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+          </div>
+          <div class="moat-name">Charter party template lock-in</div>
+        </div>
+        <div class="moat-right">
+          <p class="moat-desc">Once a trading house standardizes its bespoke charter party template parsing inside Kario, switching costs become enormous. Every internal workflow, every historical calculation, every settled dispute record lives in the platform. The more voyages processed, the harder it is to migrate — and the harder it is for any competitor to match the institutional knowledge embedded in a customer's Kario instance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ COMPETITIVE ━━━ -->
+<section class="section">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">Competitive landscape</span></div>
+      <h2 class="sec-h2">Why incumbents lose —<br>and why the timing is now</h2>
+    </div>
+    <div class="comp-grid fade-up">
+      <div class="comp-card">
+        <div class="comp-title">Orca Systems / Q88</div>
+        <p class="comp-body">Legacy vessel management platforms from the early 2000s. Offer manual laytime templates and spreadsheet exports. No AI, no document parsing, no dispute intelligence. The "technology" is Microsoft Excel with a maritime skin — and a price tag to match.</p>
+        <div class="comp-tags">
+          <span class="ctag-r">No AI</span><span class="ctag-r">Manual input only</span><span class="ctag-r">No dispute layer</span>
+        </div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-title">Clarkson's / Braemar</div>
+        <p class="comp-body">Brokers and market data providers with deep fixture and rate data. They are not software companies and have no contract execution layer, no automation. Their data is valuable as an input to Kario — not competition for it.</p>
+        <div class="comp-tags">
+          <span class="ctag-r">Data, not software</span><span class="ctag-r">No contract execution</span><span class="ctag-r">No automation</span>
+        </div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-title">Internal Excel tooling</div>
+        <p class="comp-body">Every major trading house has a bespoke laytime spreadsheet built by someone who left three years ago. Tribal knowledge. No audit trail. No exception database. No dispute prediction. The most common "competitor" — and the easiest to displace because the cost of staying is already enormous.</p>
+        <div class="comp-tags">
+          <span class="ctag-r">No audit trail</span><span class="ctag-r">Tribal knowledge</span><span class="ctag-r">No exceptions DB</span>
+        </div>
+      </div>
+      <div class="comp-card kario">
+        <div class="comp-title">Kario — a new category</div>
+        <p class="comp-body">The only AI-native, document-first contract execution layer in maritime. Not a data provider, not a broker tool, not a spreadsheet upgrade — a new category entirely: maritime contract intelligence. First to own this position owns the workflow for the entire industry.</p>
+        <div class="comp-tags">
+          <span class="ctag-g">AI-native</span><span class="ctag-g">Document-first</span><span class="ctag-g">Court-defensible</span><span class="ctag-g">New category</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ PRICING ━━━ -->
+<section class="section" id="pricing" style="background:var(--bg2); border-top:0.5px solid var(--bdr); border-bottom:0.5px solid var(--bdr);">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">Pricing</span></div>
+      <h2 class="sec-h2">Aligned with every dollar<br>you recover</h2>
+    </div>
+    <div class="pricing-grid fade-up">
+      <div class="price-card">
+        <div class="price-tier">Voyage</div>
+        <div class="price-amt">$80–$200</div>
+        <div class="price-period">per voyage calculation</div>
+        <div class="price-div"></div>
+        <ul class="price-list">
+          <li>Operators running 50–200 voyages per year</li>
+          <li>Full laytime calculation + claim draft</li>
+          <li>Port exception database included</li>
+          <li>No annual commitment required</li>
+          <li>Scales directly with fleet activity</li>
+        </ul>
+        <a href="#cta" class="price-cta pc-outline">Get started</a>
+      </div>
+      <div class="price-card featured">
+        <div class="feat-tag">Most popular</div>
+        <div class="price-tier">Enterprise</div>
+        <div class="price-amt">$150K–$500K</div>
+        <div class="price-period">ARR &middot; unlimited voyages</div>
+        <div class="price-div"></div>
+        <ul class="price-list">
+          <li>Trading houses and large fleet operators</li>
+          <li>Unlimited voyage calculations + full API</li>
+          <li>Counterparty diff + dispute workflow</li>
+          <li>Custom CP template library</li>
+          <li>Dedicated maritime customer success team</li>
+        </ul>
+        <a href="#cta" class="price-cta pc-filled">Request demo</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">White-label</div>
+        <div class="price-amt">5–8%</div>
+        <div class="price-period">of recovered demurrage claims</div>
+        <div class="price-div"></div>
+        <ul class="price-list">
+          <li>P&amp;I clubs and maritime law firms</li>
+          <li>Full white-label branding available</li>
+          <li>Revenue-share aligns incentives completely</li>
+          <li>Massive upside per dispute resolved</li>
+          <li>Bulk portfolio management dashboard</li>
+        </ul>
+        <a href="#cta" class="price-cta pc-outline">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ GTM ━━━ -->
+<section class="section">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">Go-to-market</span></div>
+      <h2 class="sec-h2">Start with the handler.<br>Win the house.</h2>
+      <p class="sec-sub">The person who loses sleep over demurrage is not a VP — it's the ops analyst processing 15 voyages a week. Land bottom-up through this persona. When one analyst saves 10 hours a week and recovers $200K in a missed claim, the platform sells itself upward.</p>
+    </div>
+    <div class="gtm-grid fade-up">
+      <div class="gtm-card">
+        <div class="gtm-phase">Phase 01 &middot; 0–12 months</div>
+        <div class="gtm-title">Acquire the handlers</div>
+        <p class="gtm-body">Free voyage calculator. Acquire demurrage claims handlers at Greek, Singaporean, and Scandinavian operators. Every free voyage processed is training data for the dispute model and the port exception database.</p>
+      </div>
+      <div class="gtm-card">
+        <div class="gtm-phase">Phase 02 &middot; 12–24 months</div>
+        <div class="gtm-title">Convert and expand</div>
+        <p class="gtm-body">Convert operators to paid voyage plans. Launch the dispute predictor product. Close the first trading house enterprise deal. Target one P&amp;I club partnership for white-label distribution and bulk portfolio volume.</p>
+      </div>
+      <div class="gtm-card">
+        <div class="gtm-phase">Phase 03 &middot; 24–36 months</div>
+        <div class="gtm-title">Own the network</div>
+        <p class="gtm-body">Counterparty network live — both sides of disputes on-platform. Expand into the full charter party lifecycle: fixture recap automation, performance claims, cargo quality disputes. The contract intelligence layer for all of maritime.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ FOUNDER ━━━ -->
+<section class="section founder-section" id="company">
+  <div class="container">
+    <div class="sec-hd fade-up">
+      <div class="eyebrow"><div class="ey-line"></div><span class="label">The team</span></div>
+      <h2 class="sec-h2">Built by someone who<br>understands the contract</h2>
+    </div>
+    <div class="founder-inner fade-up">
+      <div class="founder-photo">
+        <div class="founder-initials">AB</div>
+      </div>
+      <div>
+        <div class="founder-name">Amit Bhartiya</div>
+        <div class="founder-role">Founder &amp; CEO, Kario</div>
+        <p class="founder-bio">Kario exists because the maritime industry's most valuable workflows — laytime, demurrage, charter party disputes — have been completely untouched by modern software. The incumbents are ancient. The spreadsheets are tribal. And every day of delay costs someone six figures.</p>
+        <p class="founder-bio">The opportunity isn't to digitize shipping — it's to build the contract intelligence layer the industry has never had: one that reads the documents operators actually use, applies the law as arbitrators actually interpret it, and produces claims that hold up when it counts most.</p>
+        <div class="founder-detail">
+          <div class="fd-row">
+            <div class="fd-key">Company</div>
+            <div class="fd-val">Kario &mdash; Maritime Contract Intelligence</div>
+          </div>
+          <div class="fd-row">
+            <div class="fd-key">Focus</div>
+            <div class="fd-val">Charter party automation, laytime calculation, demurrage dispute resolution</div>
+          </div>
+          <div class="fd-row">
+            <div class="fd-key">Market</div>
+            <div class="fd-val">Dry bulk, tanker, and commodity trading &mdash; global</div>
+          </div>
+          <div class="fd-row">
+            <div class="fd-key">Contact</div>
+            <div class="fd-val fd-gold">amit@kario.io</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ FINAL CTA ━━━ -->
+<section class="section final-cta" id="cta">
+  <div class="container">
+    <div class="fade-up">
+      <div class="eyebrow cta-eyebrow"><div class="ey-line"></div><span class="label">Get started</span><div class="ey-line"></div></div>
+      <h2 class="cta-h2">Your next claim should<br>take <em>18 minutes.</em></h2>
+      <p class="cta-sub">Kario gives demurrage teams the calculation infrastructure that's faster, more complete, and defensible under arbitration. Request a demo — we'll run a live calculation on your actual charter party.</p>
+      <div class="cta-btns">
+        <a href="mailto:amit@kario.io" class="btn-primary">Request a demo &rarr;</a>
+        <a href="#product" class="btn-ghost">Explore the platform</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ FOOTER ━━━ -->
+<footer>
+  <div class="container">
+    <div class="foot-inner">
+      <div>
+        <div class="foot-brand-text">
+          <div class="foot-logo-mark">K</div>
+          KARIO
+        </div>
+        <p class="foot-tagline">Maritime contract intelligence. Laytime, demurrage, and dispute automation for the global shipping industry.</p>
+      </div>
+      <div>
+        <div class="foot-col-title">Product</div>
+        <div class="foot-links">
+          <a href="#product">Contract Parser</a>
+          <a href="#product">Laytime Engine</a>
+          <a href="#product">Dispute Predictor</a>
+          <a href="#how">How it works</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-col-title">Company</div>
+        <div class="foot-links">
+          <a href="#company">About</a>
+          <a href="#company">Founders</a>
+          <a href="#cta">Careers</a>
+          <a href="mailto:amit@kario.io">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-col-title">Legal</div>
+        <div class="foot-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Security</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <div class="foot-copy">&copy; 2025 Kario Technologies, Inc. &mdash; All rights reserved.</div>
+      <div class="foot-coords">51&deg;30&prime;N 0&deg;07&prime;W &middot; London</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Hero amount counter
+(function() {
+  const el = document.getElementById('hero-amt');
+  if (!el) return;
+  const target = 47291.67;
+  const dur = 2200;
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 4);
+    el.textContent = '$' + (e * target).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  setTimeout(() => requestAnimationFrame(tick), 700);
+})();
+
+// Scroll fade-up
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// Sticky nav shadow
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('nav');
+  nav.style.boxShadow = window.scrollY > 50 ? '0 2px 40px rgba(0,0,0,0.5)' : 'none';
+}, { passive: true });
+
+// Staggered fade for grid children
+document.querySelectorAll('.prod-grid, .prob-grid, .how-grid, .users-grid, .comp-grid, .gtm-grid').forEach(grid => {
+  const cards = grid.querySelectorAll(':scope > *');
+  cards.forEach((card, i) => {
+    card.style.transitionDelay = `${i * 0.07}s`;
+  });
+});
+</script>
+</body>
+</html>
